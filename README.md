@@ -1,0 +1,4 @@
+fancygraph
+==========
+
+Simple graph script
