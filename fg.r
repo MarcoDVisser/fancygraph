@@ -13,7 +13,7 @@ axis(1);axis(2)
 indexer<-seq(1,100,20);offst<-250
 points(x[indexer],y[indexer],col=rgb(1,1,1,alpha=1),pch=20)
 text(x[indexer],y[indexer]+offst,round(y[indexer],1),srt=90,
-col=rgb(1,1,1,alpha=0.68))
+col=rgb(1,1,1,alpha=0.69))
 ##
 
  
