@@ -1,0 +1,93 @@
+################################################################################
+## Experiment with PSO
+################################################################################
+
+## make data
+mu <- 5
+sigma <- 10
+
+Y <- rnorm(1000,mu,sigma)
+
+## make likelihood function
+LL <- function(param){
+
+    tryCatch(
+        -sum(dnorm(Y,param[1],param[2],log=TRUE)),
+        error=function(e) -log(0)
+)
+}
+
+
+## upper and lower bounds in 2 dimensions
+alpha <- c(-100,0)
+omega <- c(100,100)
+
+## initial swarm position
+theta <- c(1,1)
+
+## velocity scaler
+beta <- 0.001
+## partical independence and swarm dependence weights
+phi <- c(0.015,0.085)
+
+
+### plot likelihood landscape
+plot(0,0,type="n",xlab="mu",ylab="sigma",
+     xlim=c(-100,100),ylim=c(0,100))
+abline(v=mu,h=sigma)
+legend("topright",legend=c("partical","swarm's current best", "solution"),
+       pch=c(20,3,4),col=c("blue","grey","red"),bty="n")
+
+## Partical swarm optimizer
+## @param S number of particles (swarm size)
+## @param N maximum number of iterations
+PSO <- function(LL,theta,alpha,omega,beta,phi,S=10,N=100){
+
+    G <- theta
+    K <- length(theta)
+    V <- B <- P <- matrix(ncol=K,nrow=S)
+       
+
+    ## initialize 
+    for(p in 1:S){
+        P[p,] <- runif(K,alpha,omega)
+        V[p,] <- runif(K,-abs(omega-alpha),abs(omega-alpha))
+        if(LL(P[p,])<LL(G)) G <- P[p,]
+    }
+
+    ## set initial values as best position particles
+    B <- P
+
+    ## plot initial positons
+    points(P,pch=20,col=rgb(0,0,1,alpha=0.8))
+    
+    ## start actual swarm
+    for(i in 1:N){
+        I <- P
+        for(p in 1:S){
+            ## movement vector
+            rp <- runif(2,0,1)
+            rg <- runif(2,0,1)
+            M <- beta*V[p,]+phi[1]*rp*(B[p,]-P[p,])+phi[2]*rg*(G-P[p,])
+            P[p,] <- P[p,] + M
+            if(LL(P[p,])<LL(B[p,])) B[p,] <- P[p,]
+            if(LL(P[p,])<LL(G)) G <- P[p,];print(G)
+            points(G[1],G[2],col="grey",pch=3)
+            }
+
+        ## plot updated positons
+        for(ss in 1:S){
+        segments(I[ss,1],I[ss,2],P[ss,1],P[ss,2],
+                 ,lwd=2,col=rgb(0,0,1,alpha=0.24))
+        }
+    Sys.sleep(0.1)
+    }
+
+    points(G[1],G[2],pch=4,col="red",cex=2)
+    
+}
+
+
+
+PSO(LL,theta,alpha,omega,beta,phi,S=100,N=50)
+ 
